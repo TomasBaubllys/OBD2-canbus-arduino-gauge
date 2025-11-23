@@ -123,6 +123,14 @@ namespace pid_calc {
   inline int fuel_pressure(int a) {
     return 3 * a;
   }
+
+  inline int fuel_rail_pressure_kpa(int a, int b) {
+    return 10 * (256 * a + b);
+  }
+
+  inline float fuel_rail_pressure_bar(int a, int b) {
+    return (256.0f * a + b) / 10.0f;
+  }
 }
 
 #endif // PIDS_H_INCLUDED

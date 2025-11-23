@@ -27,7 +27,7 @@ enum Modes : byte {
     DISP_RPM = 0x02,
     DISP_ELOAD = 0x03,
     DISP_LAMBDA = 0x04,
-    DISP_FUEL_PRESSURE = 0x05
+    DISP_FUEL_RAIL_PRESS = 0x05
 };
 
 
@@ -38,8 +38,8 @@ int rpm_val = 0;
 int coolant_temp_val = 0;
 int map_val = -1;
 int bar_val = -1;
-float boost_psi = 0;
-int fuel_pressure = 0;
+float boost_bar = 0;
+float fuel_rail_pressure = 0;
 bool request_map = true;
 
 float engine_load_val = 0;
@@ -55,10 +55,10 @@ byte curr_mode = DISP_BOOST;
 // old values for smooth display
 int old_rpm_val = -9999;
 int old_coolant_val = -9999;
-float old_boost_psi = -9999;
+float old_boost_bar = -9999;
 float old_lambda_val = -9999;
 float old_eload_val = -9999;
-int old_fuel_pressure = -9999;
+float old_fuel_rail_pressure = -9999;
 
 void send_PID(byte mode, byte pid) {
     canMsg.can_id  = 0x7DF;
@@ -77,6 +77,7 @@ void draw_unit(const char* unit) {
     tft.setTextSize(3);
     tft.setCursor(170, 10); 
     tft.print(unit);
+    tft.print(" ");
 }
 
 void draw_mode_screen() {
@@ -88,10 +89,10 @@ void draw_mode_screen() {
     // reset old values to force a redraw
     old_rpm_val = -9999; 
     old_coolant_val = -9999;
-    old_boost_psi = -9999;
+    old_boost_bar = -9999;
     old_lambda_val = -9999;
     old_eload_val = -9999;
-    old_fuel_pressure = -9999;
+    old_fuel_rail_pressure = -9999;
 
     switch (curr_mode) {
         case DISP_RPM:
@@ -103,7 +104,7 @@ void draw_mode_screen() {
             break;
         case DISP_BOOST:
             tft.println("Boost");
-            draw_unit("psi");
+            draw_unit("bar");
             break;
         case DISP_LAMBDA:
             tft.println("Lambda");
@@ -113,9 +114,10 @@ void draw_mode_screen() {
             tft.println("E. Load");
             draw_unit("%");
             break;
-        case DISP_FUEL_PRESSURE: 
-            tft.println("Fuel Press");
-            draw_unit("kPa");
+        case DISP_FUEL_RAIL_PRESS:
+            tft.println("Fuel P.");
+            draw_unit("bar");
+            break;
         default:
             tft.println("ERROR");
             break;
@@ -188,8 +190,8 @@ void loop() {
                 }
                 request_map = !request_map;
                 break;
-            case Modes::DISP_FUEL_PRESSURE:
-                send_PID(CURRENT_DATA_MODE, FUEL_PRESSURE);
+            case Modes::DISP_FUEL_RAIL_PRESS:
+                send_PID(CURRENT_DATA_MODE, FUEL_RAIL_PRESSURE);
                 break;
             default:
                 break;
@@ -216,11 +218,11 @@ void loop() {
                     break;
                 case INTAKE_MANIFOLD_PRESSURE:
                     map_val = pid_calc::map_kpa(a);
-                    boost_psi = pid_calc::boost_psi(map_val, bar_val);
+                    boost_bar = pid_calc::boost_bar(map_val, bar_val);
                     break;
                 case BAROMETRIC_PRESSURE:
                     bar_val = pid_calc::bap_kpa(a);
-                    boost_psi = pid_calc::boost_psi(map_val, bar_val);
+                    boost_bar = pid_calc::boost_bar(map_val, bar_val);
                     break;
                 case CALCULATED_ENGINE_LOAD:
                     engine_load_val = pid_calc::engine_load(a);
@@ -228,8 +230,8 @@ void loop() {
                 case FUEL_AIR_EQUIV_RATIO:
                     fuel_air_eqr_val = pid_calc::fuel_air_eq_ration(a, b);
                     break;
-                case FUEL_PRESSURE:
-                    fuel_pressure = pid_calc::fuel_pressure(a);
+                case FUEL_RAIL_PRESSURE:
+                    fuel_rail_pressure = pid_calc::fuel_rail_pressure_bar(a, b);
                     break;
                 default: 
                     break;
@@ -259,12 +261,12 @@ void loop() {
                 }
                 break;
             case DISP_BOOST:
-                if (abs(boost_psi - old_boost_psi) > 0.01) {
+                if (abs(boost_bar - old_boost_bar) > 0.01) {
                     tft.setCursor(10, 100);
                     tft.setTextSize(6);
-                    tft.print(boost_psi, 1);
+                    tft.print(boost_bar, 1);
                     tft.print("   "); // Padding
-                    old_boost_psi = boost_psi;
+                    old_boost_bar = boost_bar;
                 }
                 break;
             case DISP_LAMBDA:
@@ -285,14 +287,15 @@ void loop() {
                     old_eload_val = engine_load_val;
                 }
                 break;
-            case DISP_FUEL_PRESSURE:
-                if(fuel_pressure != old_fuel_pressure) {
+            case DISP_FUEL_RAIL_PRESS:
+                if(old_fuel_rail_pressure != fuel_rail_pressure) {
                     tft.setCursor(10, 100);
                     tft.setTextSize(6);
-                    tft.print(fuel_pressure, 1);
+                    tft.print(fuel_rail_pressure, 1);
                     tft.print("   "); // Padding
-                    old_fuel_pressure = fuel_pressure;
+                    old_fuel_rail_pressure = fuel_rail_pressure;
                 }
+                break;
             default:
                 break;
         }
