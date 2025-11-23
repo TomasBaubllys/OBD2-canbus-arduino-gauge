@@ -40,6 +40,6 @@ You will have to create the provided wiring diagram.
 --- 
 
 # Notes
-- Feel free to experiment with more CAN request (you can find them in pids.h file or ![wikipedia OBD II PIDS](https://en.wikipedia.org/wiki/OBD-II_PIDs)), for now I have included the more important ones for my car, but I plan on making the gauge more universal.
+- Feel free to experiment with more CAN request (you can find them in pids.h file or ![wikipedia OBD II PIDS](https://en.wikipedia.org/wiki/OBD-II_PIDs), for now I have included the more important ones for my car, but I plan on making the gauge more universal.
 
 
