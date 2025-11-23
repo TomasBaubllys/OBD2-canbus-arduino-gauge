@@ -17,7 +17,7 @@ You can use the button to switch between different display modes.
 - You can view or download the component list here: [partslist.csv](partslist.csv)
 
 ## Circuit Diagram
-![Circuit photo](photo.jpeg)
+![Circuit photo](photo.jpg)
 
 ## Wirring Diagram
 ![Wirring diagram](wirring.pdf)
