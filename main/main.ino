@@ -1,3 +1,7 @@
+/*
+Code by Tomas Baublys
+*/
+
 #include <SPI.h>
 #include <mcp2515.h>
 #include "pids.h"
